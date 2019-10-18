@@ -2,12 +2,16 @@
 using System;
 using System.Data;
 using System.Data.OleDb;
+using System.Drawing;
 using System.Windows.Forms;
 using DevExpress.DataAccess.ConnectionParameters;
 using DevExpress.DataAccess.Sql;
 using DevExpress.XtraPivotGrid;
+using DevExpress.XtraPrinting;
 using DevExpress.XtraReports.UI;
+using DevExpress.XtraReports.UI.CrossTab;
 using DevExpress.XtraReports.UI.PivotGrid;
+using ExpressionBinding = DevExpress.XtraReports.UI.ExpressionBinding;
 // ...
 #endregion #Reference
 
@@ -17,56 +21,84 @@ namespace docXRPivotGrid {
             InitializeComponent();
         }
 
-#region #Code
-private void button1_Click(object sender, EventArgs e) {
-    // Create a cross-tab report.
-    XtraReport report = CreateReport();
+        private void button1_Click(object sender, EventArgs e) {
+            // Create a cross-tab report.
+            using (XtraReport report = CreateReport())
+            using (ReportPrintTool tool = new ReportPrintTool(report)) {
+                // Show its Print Preview.
+                tool.ShowRibbonPreviewDialog();
+            }
+        }
 
-    // Show its Print Preview.
-    report.ShowPreview();
-}
+        #region #Report Generation Code
 
-private XtraReport CreateReport() {
-    // Create a blank report.
-    XtraReport crossTabReport = new XtraReport();
+        private XtraReport CreateReport() {
+            // Create a blank report.
+            XtraReport crossTabReport = new XtraReport() {
+                VerticalContentSplitting = VerticalContentSplitting.Smart,
+                HorizontalContentSplitting = HorizontalContentSplitting.Smart
+            };
 
-    // Create a detail band and add it to the report.
-    DetailBand detail = new DetailBand();
-    crossTabReport.Bands.Add(detail);
+            // Create a detail band and add it to the report.
+            DetailBand detail = new DetailBand();
+            crossTabReport.Bands.Add(detail);
 
-    // Create a pivot grid and add it to the Detail band.
-    XRPivotGrid pivotGrid = new XRPivotGrid();
-    detail.Controls.Add(pivotGrid);
+            // Create a cross tab and add it to the Detail band.
+            XRCrossTab crossTab = new XRCrossTab();
+            detail.Controls.Add(crossTab);
+            crossTab.PrintOptions.RepeatColumnHeaders = true;
+            crossTab.PrintOptions.RepeatRowHeaders = true;
 
-    // Create a data source
-    Access97ConnectionParameters connectionParameters = new Access97ConnectionParameters("..\\..\\nwind.mdb", "", "");
-    SqlDataSource ds = new SqlDataSource(connectionParameters);
+            // Create a data source
+            Access97ConnectionParameters connectionParameters = new Access97ConnectionParameters(@"|DataDirectory|\nwind.mdb", "", "");
+            SqlDataSource ds = new SqlDataSource(connectionParameters);
 
-    // Create an SQL query to access the SalesPerson view.
-    CustomSqlQuery query = new CustomSqlQuery();
-    query.Name = "SalesPerson";
-    query.Sql = "SELECT CategoryName, ProductName, Country, [Sales Person], Quantity, [Extended Price]  FROM SalesPerson";
-    ds.Queries.Add(query);
-    
-    // Bind the pivot grid to data.
-    pivotGrid.DataSource = ds;
-    pivotGrid.DataMember = "SalesPerson";
+            // Create an SQL query to access the SalesPerson view.
+            SelectQuery query = SelectQueryFluentBuilder.AddTable("SalesPerson")
+                        .SelectColumn("CategoryName")
+                        .SelectColumn("ProductName")
+                        .SelectColumn("Country")
+                        .SelectColumn("Sales Person")
+                        .SelectColumn("Quantity")
+                        .SelectColumn("Extended Price").Build("SalesPerson");
+            ds.Queries.Add(query);
 
-    // Generate pivot grid's fields.
-    XRPivotGridField fieldCategoryName = new XRPivotGridField("CategoryName", PivotArea.RowArea);
-    XRPivotGridField fieldProductName = new XRPivotGridField("ProductName", PivotArea.RowArea);
-    XRPivotGridField fieldCountry = new XRPivotGridField("Country", PivotArea.ColumnArea);
-    XRPivotGridField fieldSalesPerson = new XRPivotGridField("Sales Person", PivotArea.ColumnArea);
-    XRPivotGridField fieldQuantity = new XRPivotGridField("Quantity", PivotArea.DataArea);
-    XRPivotGridField fieldExtendedPrice = new XRPivotGridField("Extended Price", PivotArea.DataArea);
+            // Bind the cross tab to data.
+            crossTab.DataSource = ds;
+            crossTab.DataMember = "SalesPerson";
 
-    // Add these fields to the pivot grid.
-    pivotGrid.Fields.AddRange(new XRPivotGridField[] {fieldCategoryName, fieldProductName, fieldCountry, 
-        fieldSalesPerson, fieldQuantity, fieldExtendedPrice});
+            // Generate cross tab's fields.
+            XRCrossTabCell cellCategoryName = new XRCrossTabCell();
+            crossTab.RowFields.Add(new CrossTabRowField() { FieldName = "CategoryName" });
+            crossTab.RowFields.Add(new CrossTabRowField() { FieldName = "ProductName" });
+            crossTab.ColumnFields.Add(new CrossTabColumnField() { FieldName = "Country" });
+            crossTab.ColumnFields.Add(new CrossTabColumnField() { FieldName = "Sales Person" });
+            crossTab.DataFields.Add(new CrossTabDataField() { FieldName = "Quantity" });
+            crossTab.DataFields.Add(new CrossTabDataField() { FieldName = "Extended Price" });
+            crossTab.GenerateLayout();
+            
+            foreach(var c in crossTab.ColumnDefinitions) {
+                c.AutoWidthMode = DevExpress.XtraReports.UI.AutoSizeMode.GrowOnly;
+            }
 
-    return crossTabReport;
-}
-#endregion #Code
+
+            // Assign styles to cross tab
+            crossTab.CrossTabStyles.GeneralStyle = new XRControlStyle() { 
+                Name = "Default",
+                Borders = BorderSide.All,
+                Padding = new PaddingInfo() { All = 2 }                
+            };
+            crossTab.CrossTabStyles.DataAreaStyle = crossTab.CrossTabStyles.TotalAreaStyle = new XRControlStyle() {
+                Name = "Data",
+                TextAlignment = TextAlignment.TopRight
+            };
+            crossTab.CrossTabStyles.HeaderAreaStyle = new XRControlStyle() {
+                Name = "HeaderAndTotals",
+                BackColor = Color.WhiteSmoke
+            };
+            return crossTabReport;
+        }
+        #endregion #Code
     }
 }
 
