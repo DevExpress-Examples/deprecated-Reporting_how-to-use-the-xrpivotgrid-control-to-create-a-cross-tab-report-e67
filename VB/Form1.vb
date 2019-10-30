@@ -65,7 +65,6 @@ Namespace docXRPivotGrid
 			crossTab.DataMember = "SalesPerson"
 
 			' Generate cross tab's fields.
-			Dim cellCategoryName As New XRCrossTabCell()
 			crossTab.RowFields.Add(New CrossTabRowField() With {.FieldName = "CategoryName"})
 			crossTab.RowFields.Add(New CrossTabRowField() With {.FieldName = "ProductName"})
 			crossTab.ColumnFields.Add(New CrossTabColumnField() With {.FieldName = "Country"})
@@ -73,9 +72,33 @@ Namespace docXRPivotGrid
 			crossTab.DataFields.Add(New CrossTabDataField() With {.FieldName = "Quantity"})
 			crossTab.DataFields.Add(New CrossTabDataField() With {.FieldName = "Extended Price"})
 			crossTab.GenerateLayout()
+'            
+'            +----------------+---------------+-------------------------------+---------------------------+---------------------------+
+'            | Category Name  | Product Name  | [Country]                     | Total [Country]           | Grand total               |
+'            |                |               +-------------------------------+                           |                           |
+'            |                |               | [Sales Person]                |                           |                           |
+'            |                |               +------------+------------------+----------+----------------+----------+----------------+
+'            |                |               | Quantity   | Extended Price   | Quantity | Extended Price | Quantity | Extended Price |
+'            +----------------+---------------+------------+------------------+----------+----------------+----------+----------------+
+'            | [CategoryName] | [ProductName] | [Quantity] | [Extended Price] |          |                |          |                |
+'            +----------------+---------------+------------+------------------+----------+----------------+----------+----------------+
+'            | Total [CategoryName]           |            |                  |          |                |          |                |
+'            +--------------------------------+------------+------------------+----------+----------------+----------+----------------+
+'            | Grand Total                    |            |                  |          |                |          |                |
+'            +--------------------------------+------------+------------------+----------+----------------+----------+----------------+
+'            
 
+			'Adjust generated cells
 			For Each c In crossTab.ColumnDefinitions
+				'Enable auto-width for all columns
 				c.AutoWidthMode = DevExpress.XtraReports.UI.AutoSizeMode.GrowOnly
+			Next c
+
+			For Each c As XRCrossTabCell In crossTab.Cells
+				If c.DataLevel = 1 AndAlso c.RowIndex <> 2 Then
+					'Adjust format string for the "Extended Price" cells
+					c.TextFormatString = "{0:c}"
+				End If
 			Next c
 
 
