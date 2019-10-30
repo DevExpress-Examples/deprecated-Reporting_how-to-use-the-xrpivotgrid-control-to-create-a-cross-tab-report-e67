@@ -68,7 +68,6 @@ namespace docXRPivotGrid {
             crossTab.DataMember = "SalesPerson";
 
             // Generate cross tab's fields.
-            XRCrossTabCell cellCategoryName = new XRCrossTabCell();
             crossTab.RowFields.Add(new CrossTabRowField() { FieldName = "CategoryName" });
             crossTab.RowFields.Add(new CrossTabRowField() { FieldName = "ProductName" });
             crossTab.ColumnFields.Add(new CrossTabColumnField() { FieldName = "Country" });
@@ -76,9 +75,33 @@ namespace docXRPivotGrid {
             crossTab.DataFields.Add(new CrossTabDataField() { FieldName = "Quantity" });
             crossTab.DataFields.Add(new CrossTabDataField() { FieldName = "Extended Price" });
             crossTab.GenerateLayout();
+            /*
+            +----------------+---------------+-------------------------------+---------------------------+---------------------------+
+            | Category Name  | Product Name  | [Country]                     | Total [Country]           | Grand total               |
+            |                |               +-------------------------------+                           |                           |
+            |                |               | [Sales Person]                |                           |                           |
+            |                |               +------------+------------------+----------+----------------+----------+----------------+
+            |                |               | Quantity   | Extended Price   | Quantity | Extended Price | Quantity | Extended Price |
+            +----------------+---------------+------------+------------------+----------+----------------+----------+----------------+
+            | [CategoryName] | [ProductName] | [Quantity] | [Extended Price] |          |                |          |                |
+            +----------------+---------------+------------+------------------+----------+----------------+----------+----------------+
+            | Total [CategoryName]           |            |                  |          |                |          |                |
+            +--------------------------------+------------+------------------+----------+----------------+----------+----------------+
+            | Grand Total                    |            |                  |          |                |          |                |
+            +--------------------------------+------------+------------------+----------+----------------+----------+----------------+
+            */
             
+            //Adjust generated cells
             foreach(var c in crossTab.ColumnDefinitions) {
+                //Enable auto-width for all columns
                 c.AutoWidthMode = DevExpress.XtraReports.UI.AutoSizeMode.GrowOnly;
+            }
+
+            foreach(XRCrossTabCell c in crossTab.Cells) {
+                if(c.DataLevel == 1 && c.RowIndex != 2) {
+                    //Adjust format string for the "Extended Price" cells
+                    c.TextFormatString = "{0:c}";
+                }
             }
 
 
