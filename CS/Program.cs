@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace docXRPivotGrid {
+namespace CrossTabReportSample {
     static class Program {
         /// <summary>
         /// The main entry point for the application.

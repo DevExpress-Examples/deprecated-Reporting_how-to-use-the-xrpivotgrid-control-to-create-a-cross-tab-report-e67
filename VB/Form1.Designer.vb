@@ -1,4 +1,4 @@
-﻿Namespace docXRPivotGrid
+﻿Namespace CrossTabReportSample
 	Partial Public Class Form1
 		''' <summary>
 		''' Required designer variable.
@@ -16,7 +16,7 @@
 			MyBase.Dispose(disposing)
 		End Sub
 
-		#Region "Windows Form Designer generated code"
+#Region "Windows Form Designer generated code"
 
 		''' <summary>
 		''' Required method for Designer support - do not modify
@@ -34,12 +34,12 @@
 			Me.button1.TabIndex = 0
 			Me.button1.Text = "Show Report"
 			Me.button1.UseVisualStyleBackColor = True
-'INSTANT VB NOTE: The following InitializeComponent event wireup was converted to a 'Handles' clause:
-'ORIGINAL LINE: this.button1.Click += new System.EventHandler(this.button1_Click);
+			'INSTANT VB NOTE: The following InitializeComponent event wireup was converted to a 'Handles' clause:
+			'ORIGINAL LINE: this.button1.Click += new System.EventHandler(this.button1_Click);
 			' 
 			' Form1
 			' 
-			Me.AutoScaleDimensions = New System.Drawing.SizeF(6F, 13F)
+			Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0F, 13.0F)
 			Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 			Me.ClientSize = New System.Drawing.Size(422, 265)
 			Me.Controls.Add(Me.button1)
@@ -49,7 +49,7 @@
 
 		End Sub
 
-		#End Region
+#End Region
 
 		Private WithEvents button1 As System.Windows.Forms.Button
 	End Class
