@@ -1,111 +1,102 @@
-#region #Reference
-using System;
-using System.Data;
-using System.Data.OleDb;
-using System.Drawing;
-using System.Windows.Forms;
 using DevExpress.DataAccess.ConnectionParameters;
 using DevExpress.DataAccess.Sql;
-using DevExpress.XtraPivotGrid;
 using DevExpress.XtraPrinting;
 using DevExpress.XtraReports.UI;
 using DevExpress.XtraReports.UI.CrossTab;
-using DevExpress.XtraReports.UI.PivotGrid;
-using ExpressionBinding = DevExpress.XtraReports.UI.ExpressionBinding;
-// ...
-#endregion #Reference
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 
-namespace docXRPivotGrid {
-    public partial class Form1 : Form {
+namespace CrossTabReportSample
+{
+    public partial class Form1 : DevExpress.XtraEditors.XtraForm
+    {
         public Form1() {
             InitializeComponent();
         }
 
         private void button1_Click(object sender, EventArgs e) {
-            // Create a cross-tab report.
+            // Creates a cross-tab report.
             using (XtraReport report = CreateReport())
             using (ReportPrintTool tool = new ReportPrintTool(report)) {
-                // Show its Print Preview.
+                // Shows the Print Preview.
                 tool.ShowRibbonPreviewDialog();
             }
         }
 
-        #region #Report Generation Code
-
         private XtraReport CreateReport() {
-            // Create a blank report.
+            // Creates a blank report.
             XtraReport crossTabReport = new XtraReport() {
                 VerticalContentSplitting = VerticalContentSplitting.Smart,
                 HorizontalContentSplitting = HorizontalContentSplitting.Smart
             };
 
-            // Create a detail band and add it to the report.
+            // Creates a detail band and adds it to the report.
             DetailBand detail = new DetailBand();
             crossTabReport.Bands.Add(detail);
 
-            // Create a cross tab and add it to the Detail band.
+            // Creates a cross tab and adds it to the Detail band.
             XRCrossTab crossTab = new XRCrossTab();
             detail.Controls.Add(crossTab);
             crossTab.PrintOptions.RepeatColumnHeaders = true;
             crossTab.PrintOptions.RepeatRowHeaders = true;
 
-            // Create a data source
-            Access97ConnectionParameters connectionParameters = new Access97ConnectionParameters(@"|DataDirectory|\nwind.mdb", "", "");
+            // Creates a data source.
+            SQLiteConnectionParameters connectionParameters = new SQLiteConnectionParameters(@"|DataDirectory|\nwind.db", "");
             SqlDataSource ds = new SqlDataSource(connectionParameters);
 
-            // Create an SQL query to access the SalesPerson view.
+            // Creates an SQL query to access the SalesPerson view.
             SelectQuery query = SelectQueryFluentBuilder.AddTable("SalesPerson")
                         .SelectColumn("CategoryName")
                         .SelectColumn("ProductName")
                         .SelectColumn("Country")
-                        .SelectColumn("Sales Person")
+                        .SelectColumn("FullName")
                         .SelectColumn("Quantity")
-                        .SelectColumn("Extended Price").Build("SalesPerson");
+                        .SelectColumn("ExtendedPrice").Build("SalesPerson");
             ds.Queries.Add(query);
 
-            // Bind the cross tab to data.
+            // Binds the cross tab to data.
             crossTab.DataSource = ds;
             crossTab.DataMember = "SalesPerson";
 
-            // Generate cross tab's fields.
+            // Generates cross tab fields.
             crossTab.RowFields.Add(new CrossTabRowField() { FieldName = "CategoryName" });
             crossTab.RowFields.Add(new CrossTabRowField() { FieldName = "ProductName" });
             crossTab.ColumnFields.Add(new CrossTabColumnField() { FieldName = "Country" });
-            crossTab.ColumnFields.Add(new CrossTabColumnField() { FieldName = "Sales Person" });
+            crossTab.ColumnFields.Add(new CrossTabColumnField() { FieldName = "FullName" });
             crossTab.DataFields.Add(new CrossTabDataField() { FieldName = "Quantity" });
-            crossTab.DataFields.Add(new CrossTabDataField() { FieldName = "Extended Price" });
+            crossTab.DataFields.Add(new CrossTabDataField() { FieldName = "ExtendedPrice" });
             crossTab.GenerateLayout();
             /*
             +----------------+---------------+-------------------------------+---------------------------+---------------------------+
             | Category Name  | Product Name  | [Country]                     | Total [Country]           | Grand total               |
             |                |               +-------------------------------+                           |                           |
-            |                |               | [Sales Person]                |                           |                           |
+            |                |               | [FullName]                    |                           |                           |
             |                |               +------------+------------------+----------+----------------+----------+----------------+
             |                |               | Quantity   | Extended Price   | Quantity | Extended Price | Quantity | Extended Price |
             +----------------+---------------+------------+------------------+----------+----------------+----------+----------------+
-            | [CategoryName] | [ProductName] | [Quantity] | [Extended Price] |          |                |          |                |
+            | [CategoryName] | [ProductName] | [Quantity] | [ExtendedPrice]  |          |                |          |                |
             +----------------+---------------+------------+------------------+----------+----------------+----------+----------------+
             | Total [CategoryName]           |            |                  |          |                |          |                |
             +--------------------------------+------------+------------------+----------+----------------+----------+----------------+
             | Grand Total                    |            |                  |          |                |          |                |
             +--------------------------------+------------+------------------+----------+----------------+----------+----------------+
             */
-            
-            //Adjust generated cells
+            // Adjusts the generated cells.
             foreach(var c in crossTab.ColumnDefinitions) {
-                //Enable auto-width for all columns
+                // Enables auto-width for all columns.
                 c.AutoWidthMode = DevExpress.XtraReports.UI.AutoSizeMode.GrowOnly;
             }
 
             foreach(XRCrossTabCell c in crossTab.Cells) {
                 if(c.DataLevel == 1 && c.RowIndex != 2) {
-                    //Adjust format string for the "Extended Price" cells
+                    // Adjusts format string for the "Extended Price" cells.
                     c.TextFormatString = "{0:c}";
                 }
             }
 
 
-            // Assign styles to cross tab
+            // Assigns styles to the cross tab.
             crossTab.CrossTabStyles.GeneralStyle = new XRControlStyle() { 
                 Name = "Default",
                 Borders = BorderSide.All,
@@ -121,7 +112,6 @@ namespace docXRPivotGrid {
             };
             return crossTabReport;
         }
-        #endregion #Code
     }
 }
 

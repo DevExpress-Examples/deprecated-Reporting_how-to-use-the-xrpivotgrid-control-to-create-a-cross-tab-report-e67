@@ -1,8 +1,8 @@
-﻿Imports System
+Imports System
 Imports System.Collections.Generic
 Imports System.Windows.Forms
 
-Namespace docXRPivotGrid
+Namespace CrossTabReportSample
 	Friend Module Program
 		''' <summary>
 		''' The main entry point for the application.

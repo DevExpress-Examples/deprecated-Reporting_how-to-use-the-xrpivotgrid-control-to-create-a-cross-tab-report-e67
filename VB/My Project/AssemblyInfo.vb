@@ -1,16 +1,16 @@
-﻿Imports System.Reflection
+Imports System.Reflection
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 
 ' General Information about an assembly is controlled through the following 
 ' set of attributes. Change these attribute values to modify the information
 ' associated with an assembly.
-<Assembly: AssemblyTitle("docXRPivotGrid")>
+<Assembly: AssemblyTitle("CrossTabReportSample")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyConfiguration("")>
 <Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("docXRPivotGrid")>
-<Assembly: AssemblyCopyright("Copyright ©  2008")>
+<Assembly: AssemblyProduct("CrossTabReportSample")>
+<Assembly: AssemblyCopyright("Copyright ©  2021")>
 <Assembly: AssemblyTrademark("")>
 <Assembly: AssemblyCulture("")>
 
